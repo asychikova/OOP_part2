@@ -23,9 +23,7 @@ orders from the deque of customer orders m_orders within each Workstation will b
 Line manager: manages an assembly line of stations, initialize assembly line, reorder stations, run operations on the workstations for a single iteration. Also it is responsible for movement of items ensuring that each order is filled (or tried to be filled)
 
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-						/-----------\
-						| Utilities |
-						\-----------/
+Utilities Module
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 Utilities module contains solution for parsing string data from input files into tokens. It will be used to extract all tokens from files. It have: 
 size_t m_widthField =1 ; which is a length of token,
@@ -72,9 +70,7 @@ char Utilities::getDelimiter() {
 
 
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-						/-----------\
-						|  Station  |
-						\-----------/
+Station Module
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 Station module manages station, each station created to fill specific item. It have functionality which help to identify stations from file using utilities module because station files have data separated by delimiter. Also it contains functions that allows to manage the state of station.
 
@@ -139,9 +135,7 @@ void Station::display(std::ostream& os, bool full) const {
 
 
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-						/---------------\
-						| CustomerOrder |
-						\---------------/
+CustomerOrder Module
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 CustomerOrder manages single order on the assembly line
 
@@ -288,9 +282,7 @@ void CustomerOrder::unableToFillItem(std::ostream& os, size_t index) { - simply 
     } - used for displaying orders in different states (complete and incomplete)
 
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-						/-------------\
-						| WorkStation |
-						\-------------/
+WorkStation Module
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 WorkStation - active station on the assembly line and contains all functionality for filling customer orders with station items. Workstation derived from the Station. 
     extern std::deque<CustomerOrder> g_pending ; - hold orders that should be placed in assembly line on first station
@@ -349,9 +341,7 @@ bool Workstation::attemptToMoveOrder() { - attempts to move order at the front o
     } - when *m_pNextStation += std::move(thisOrder) is called it use operator+= of next workstation *m_pNextStation. custOrder - result of moving thisOrder, is added to m_orders deque of next workstation using m_orders.push_back(std::move(custOrder)); it transfers order from current workstation to next
 
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-						/-------------\
-						| LineManager |
-						\-------------/
+Line Manager Module
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 LineManager - responsible for manage flow of customer orders through assembly line of workstations
 std::vector<Workstation*> m_activeLine - collection of workstations for line. It is ensuring that each order progress through workstations until it is complete or marked as incomplete
