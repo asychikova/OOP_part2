@@ -1,0 +1,95 @@
+/*
+*****************************************************************************
+                          OOP345 Workshop - #3 REFLECTION 
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NAA
+*****************************************************************************
+*/
+
+Code organization:
+There is implementation in header files for template classes because the compiler needs to have access to the entire template definition at the point of instantiation(when each configuration of parameters is set by compiler). 
+
+There is a base Collection class which is class template with parameter T for type of elements and Capacity representing maximum capacity in the collection. Specialization of the Collection class for the specific type Pair and capacity 100 Collection hold pairs.
+Set class is a template class inherited from Collection class and have additional functionality related to checking of duplicates. Specialization of Set class for case if T is double. It overrides add function to check duplicates with 0.01 before adding elements. 
+
+
+Collection module
+
+collection class template: 
+virtual destructor for Collection 
+since Collection is base class, destructor should be virtual in order to delete objects of derived class. 
+
+size() function return current number of elements in the collection, it is const in order to do not change the object state
+used in order to show size of the array: 
+		std::cout << "Set size: [" << setIntegers->size() << "]\n"; 
+
+display function displays content of the collection, prints in specified format
+
+virtual function add is used to adds item of type T to the collection, if collection is less than capacity item will be added and size will be increased indicating index of an element. Otherwise is collection is full, it will return false. 
+	
+		for (const auto& item : iData)
+			colIntegers.add(item);
+
+
+operator [] allows to access element at the index in the collection, if index is less that current number of elements in the array(m_size) then it returns element of that index, if not then m_dummy will be displayed(if T is a Pair type then will be displayed "No Key" and "No Value", if T integer type, will be 0): 
+	std::cout << "Item [5]: " << colIntegers[5] << "\n";
+
+also there is Collection<Pair,100> specialization
+it also contain size() function, display function, virtual function add, operator []. It is possible to use Collection template for different types and when the type is Pair.
+
+For example, 
+seneca::Collection<long, 20> colIntegers;
+seneca::Collection<double, 30> colFloats;
+seneca::Collection<seneca::Pair, 50> colDictionary;
+created by Collection class template where long/double/Pair will be replaces with parameter T(type of elements), and 20/30/50 with Capacity(max capacity in collection). 
+
+
+This line for example creates an instance of seneca::Set<seneca::Pair> and it is assigned to pointer of type seneca::Collection<seneca::Pair, 100>
+seneca::Collection<seneca::Pair, 100>* setDictionary = new seneca::Set<seneca::Pair>();
+
+
+seneca::Set<seneca::Pair> inherits the capacity specialization of seneca::Collection<seneca::Pair, 100>. 
+The line seneca::Collection<seneca::Pair, 100>* setDictionary = new seneca::Set<seneca::Pair>(); is valid because seneca::Set<seneca::Pair> is type of seneca::Collection<seneca::Pair, 100>. 
+Pointer setDictionary is pointing to an instance of seneca::Set<seneca::Pair> but it's declared with the base class type (seneca::Collection<seneca::Pair, 100>*) for polymorphic behaviour.
+
+
+Pair module
+
+getKey(),getValue()
+getKey and getValue function returns const references to the private members m_key and m_value,
+they are called in the overloaded operator << to show the value for output. 
+called: std::cout << "Item [0]: [" << colDictionary[0].getKey()   << "]["
+		                   << colDictionary[0].getValue() << "]\n";
+
+Default constructor Pair() and overloaded constructor Pair(const std::string& key, const std::string& value) used for crating instances of Pair. For example constructor with parameters initialize m_key and m_value with provided values: 
+      seneca::Pair pData[]{
+		      seneca::Pair("static memory", "memory allocated during the compilation time"),
+		      seneca::Pair("programmer", "a person who writes code")...
+default constructor is called all the times when element of Pair is created.
+
+Overloaded operator ==
+Check current pair and another pair for equality comparing m_key and m_value. 
+	For example it is used in Set module to check if the same item exists: if (item==(*this)[i] )
+
+Overloaded operator << is used for displaying of content in collections and sets:
+std::cout << "Item [0]: " << colFloats[0] << "\n";
+
+
+Set module
+
+template class Set that is subclass of Collection, T is type of elements. Set class template inherits from base class Collection class with specified capacity 100. 
+For example it used for creating set of Pairs: 
+seneca::Collection<seneca::Pair, 100>* setDictionary = new seneca::Set<seneca::Pair>();
+
+
+function add overrides add function in collection and checks if item is already exist in set. Iterates over elements of the set(this).(*this)[i] accesses the element at index i. item == (*this)[i] checks provided item is equal to any existing element in the set. If item is equal(compare value using ==) then addition will be not performed. If there is no duplicate then addition will be performed by the base add function: 	
+		for (const auto& item : pData)
+			setDictionary->add(item);
+
+
+template specialization - specialization for Set class where template parameter is double. It overrides add function and checks if similar double already in set(it is checks if absolute difference between new item and each element less than 0.01). If yes, return false addition is not allowed, if not then calls add function of base class and add double to set.
+For example, to create instance of Set<double> specialization of Set template class of double type is used : seneca::Collection<double, 100>* setFloats = new seneca::Set<double>;
+
+

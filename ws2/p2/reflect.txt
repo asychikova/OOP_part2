@@ -1,0 +1,166 @@
+/*
+*****************************************************************************
+                          OOP345 Workshop - #2 REFLECTION 
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NAA
+*****************************************************************************
+*/
+
+
+
+TimedEvents module manages the statically allocated array of Event objects. 
+StringSet Module manages dynamically allocated array of elements of type string.
+
+STRINGSET MODULE
+Default Constructor:
+    StringSet::StringSet() : strings(nullptr), numStrings(0) {}
+initializes strings to null pointer and numStrings to 0(creates an empty StringSet)
+
+For example, seneca::StringSet a; this line calls default constructor 
+
+
+Constructor with 1 parameter: 
+     StringSet::StringSet(const char* fileName) : strings(nullptr),numStrings(0) {
+    	std::ifstream file(fileName);
+       		if (file.is_open()) {
+            	std::string word ;
+            	while (std::getline(file,word, ' ') ) {
+                	++numStrings;
+            	}
+            	file.close();  
+            	file.open(fileName);
+
+            	if (file.is_open() ) {
+                	strings =new std::string[numStrings];
+                	for (size_t i = 0; i< numStrings; ++i) {
+                    	std::getline(file,strings[i],' ');
+                	}
+                	file.close();  
+            }
+        }
+    }
+First, it initializes variables strings and numStrings to nullptr and 0, opens the file using std::ifstream, if file is open (if (file.is_open())) while loop read each word until space and increment numStrings counting words(++numStrings;)
+After that it close the file and open it again in order to read from beginning. Allocates memory for strings(which is words from file) array based on the numStrings. After it read the words from the file and stores them in the dynamically allocated array. 
+It reads file twice: 
+	1 - to count the number of words 
+	2 - store words in a dynamically allocated array
+
+This line calls 1-parameter constructor seneca::StringSet b(argv[1]); where argv[1] is the name of file, StringSet object b contain words from that file (constructor read the content of file, count number of strings, allocates memory, adds strings into dynamically allocated array in the StringSet object b). 
+
+Destructor    
+    StringSet::~StringSet() {
+        delete[] strings;
+    } 
+
+deallocates memory allocated for the strings array.
+
+
+query size()
+    size_t StringSet::size() const {
+        return numStrings;
+    }
+
+returns number of strings in the current object
+
+
+Index operator
+   std::string StringSet::operator[](size_t index) const {
+        if (index< numStrings) {
+            return strings[index];
+        } else{
+            return "";
+        }
+    }
+allows to access strings in the StringSet by index(if index is valid it returns appropriate string, if not then returns empty string)
+
+
+In order to remove code duplication I added helper function which contains common code from Copy Constructor and Copy Assignment Operator: 
+	    void StringSet::copyFrom(const StringSet& other) {
+            delete[] strings;
+            numStrings =other.numStrings;
+            strings = new std::string[numStrings];
+
+            for (size_t i = 0;i< numStrings; ++i) {
+                strings[i]= other.strings[i];
+            }
+        }
+It deletes existing string array and copies the content of other.string to a new string array. 
+
+Copy Constructor calls the copyFrom function to copy data from the other object. 
+For example, seneca::StringSet c{ b }; calls copy constructor (c copy of the b)
+
+Copy Assignment Operator check for self-assignment and calls the copyFrom function. 
+For example, a = b; calls copy assignment operator to assign content of b to a
+
+Also I added moveFrom helper function which contain common code from Move Constructor and Move Assignment Operator: 
+
+   void StringSet::moveFrom(StringSet&& other) {
+        numStrings = other.numStrings;
+        strings =other.strings;
+
+        other.numStrings = 0;
+        other.strings= nullptr;
+    }
+
+it moves ownership of number of strings and dynamically allocated array of strings from other object to this object. After that, other object no longer owns the resources. 
+
+Move Constructor calls moveFrom to move data from the other object.
+seneca::StringSet d = std::move(a); moves content of a to d (new object)
+
+Move Assignment Operator delete strings array and calls the moveFrom function.
+a = std::move(d); moves content of d to a 
+
+
+TIMEDEVENTS MODULE
+
+Constructor for TimedEvents objects 
+    TimedEvents::TimedEvents() : numRecords(0) {}
+
+For example, seneca::TimedEvents t; this line creates an instance of TimedEvents called t
+
+startClock function set startTime to current time using td::chrono::steady_clock::now() it was created in order to save the starting time and measure the duration of event
+    void TimedEvents::startClock() {
+        startTime =std::chrono::steady_clock::now();
+    }
+
+t.startClock(); starts the clock, recording the current time and assigning it to the startTime variable of t object
+
+stopClock function set endTime and works similarly as startTime 
+    void TimedEvents::stopClock() {
+        endTime =std::chrono::steady_clock::now();
+    }
+
+t.stopClock(); stops the clock, recording the current time and assigning it to the endTime variable of t object.
+
+addEvent functiion
+    void TimedEvents::addEvent(const char* eventName) {
+        if(numRecords < MAX_EVENTS) {
+            events[numRecords].name =eventName;
+            events[numRecords].units= "nanoseconds";
+            events[numRecords].duration = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime- startTime);
+            numRecords++;
+        }
+    }
+It takes eventName as an argument and adds event record to event array if number of records less than allowed(10). After it records event name, units and event duration (difference between start time and end time of the event) in the array of events. Duration of the event calculated in nanoseconds by std::chrono::duration_cast<std::chrono::nanoseconds>. After that number of records incremented. 
+For example: t.addEvent("  Move Constructor"); record an event for "Move Constructor" with the calculated duration 
+
+Before each operation t.startClock() is called, records current time as the start time. After the operation t.stopClock() is called, records current time as the end time. Then, t.addEvent("...") is called to add event to TimedEvents object t. This record time between startTime and endTime and associate it with specific event name. startTime and endTime are continuously updated for each operation.
+
+Overloaded Output stream operator
+    std::ostream& operator<<(std::ostream& os, const TimedEvents& te) {
+        os <<"--------------------------\n";
+        os<< "Execution Times:\n";
+        os<< "--------------------------\n";
+        for (size_t i = 0; i < te.numRecords; ++i) {
+            os<<std::left <<std::setw(19) <<te.events[i].name <<std::right<< std::setw(16)<< te.events[i].duration.count()<<" "<< te.events[i].units<<'\n';
+        }
+        os<<"--------------------------\n";
+        return os;
+    }
+
+Iterates through recorded events and prints  name, duration, and units of each event in a formatted way.
+std::cout << t; outputs recorded execution times using operator<< function, display the durations and details of each recorded event.
+
+

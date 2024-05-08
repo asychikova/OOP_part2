@@ -1,0 +1,88 @@
+/*
+*****************************************************************************
+                          OOP345 Workshop - #4 REFLECTION 
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NAA
+*****************************************************************************
+*/
+
+Program manages children's toys and confirmation orders. It reads data from file and creates instances of Toy, Child and ConfirmOrder. 
+Relationships between classes: 
+Child class contain a deep copy of each Toy object and responsible for lifetime of Toy objects. Changes in the Toy do not affect Child(Child object makes separate copy of each Toy object it contains, changes to the original Toy objects do not affect the Child).
+ConfirmOrder have pointers to Toy objects and do not performs a deep copies. When changes are made in Toy, Confirm order will be affected as well(since ConfirmOrder holds pointers to Toy objects, modifications to Toy objects will be reflected in ConfirmOrder). 
+
+Toy represents a toy item (id, name, number of items, price, method for tax calculation). It have default constructor with initializer list, function update(in order to update number of items), constructor that is responsible for extracting information about the toy from the string, calculate tax function, overloaded output operator.
+
+Toy::Toy constructor(const std::string& toy) accept string in the format "#ID:Name:NUM:PRICE"
+the position is 0, and separator is ':'. Loop iterates four times(for ID, name num and price). nextPosit - find returns the index of the first occurrence of separator character after specified position. Substring from position to nextPosit (without nextPosit) extracted as a token nextPosit - position calculates the length of the extracted substring.
+            m_orderId at the first iteration (i == 0).
+            m_name of the second iteration (i == 1).
+            m_numItems on the third iteration (i == 2).
+            m_price is assigned at the fourth iteration (i == 3).
+position updated to nextPosit + 1 to prepare for next iteration.
+
+Start and end spaces in m_name are deleted using erase and find_first_not_of/find_last_not_of.
+
+For first data string, "1000121 : Red bike:1 : 89.99": m_orderId set to 1000121, m_name set to "Red Bike" after removing leading spaces, value of m_numItems is 1, m_price is 89.99.
+
+std::string token = toy.substr(position, nextPosit - position):
+starting from index position extract characters up to next index value(without including it).
+nextPosit - calculates length of extracted substring by subtracting the position from the final position(nextPosit)and resulting substring is assigned to token variable.
+
+toy is "1000121 : Red Bike:1 : 89.99", and the position is initially set to 0:
+find(separator, position) find the first ':' starting from position 0, which is in index 7.nextPosit becomes 7.
+substr function creates substring starting at index 0 (position) and ending at index 7 (nextPosit - 1). This extracts the substring "1000121".
+stod - string to double, price did not read directly, price is remaining part of token string after third : 
+stoi - string to integer
+
+
+Child represents a child with toys. It includes name, age, an array of pointers to Toy objects, and methods for copying, moving and cleaning resources.
+
+Default constructor initialize m_name, m_age, m_toys, and m_numToys.
+Constructor with parameters initialize member variables with provided variables and do deep copy of toy.
+Copy constructor perform deep copy of Toy objects from source Child object.
+Move constructor moves resources from the source Child object to new Child object.
+Copy assignment operator perform deep copy of Toy objects from the source Child object + deallocates memory from current object before copying.
+Move assignment operator move resources from source Child object to current object and deallocates memory from source object.
+Overloaded << operator output details of Child object (name, age, and the toys the child has, if any)
+--------------
+Favourite part: 
+if (m_numToys > 0) {
+    m_toys =new const Toy*[m_numToys];
+    for (size_t i = 0;i < m_numToys; ++i) {
+        m_toys[i]= new Toy(*src.m_toys[i]);
+    }
+}
+
+Each element m_toys[i] in the array is a pointer to dynamically allocated Toy object. New Toy(*src.m_toys[i]) creates a new Toy object using copy constructor (*src.m_toys[i] provide object to copy), pointer to this newly created Toy object is assigned to m_toys[i]. m_toys[i] contains the actual Toy object itself.
+
+m_toys is an array of pointers, and each pointer in the array points to a separate and independent Toy object that is a deep copy of the corresponding Toy object in src.m_toys.
+--------------
+
+ConfirmOrder represents a confirmation order for toys. 
+It includes array of pointers to Toy objects and methods to add, remove, and display toys in the confirmation order. 
+
+Default constructor initialize m_toys and m_numToys to nullptr and 0.
+Copy constructor creates a shallow copy of the object.
+Copy assignment operator assigns values of one confirm order object to another.
+Move constructor and move assignment operator moves resources of confirm object to another object.
+Display displays confirmations in the confirm obtect in formatted way.
+Add adds toy to ConfirmOrder.
+Overloaded += operator to add a toy to the ConfirmOrder.
+Overloaded += operator merge two ConfirmOrder objects (moving contents of other into the current object) merge other ConfirmOrder object in the current object. Iterates through the toys in other object and adds each toy to current object's collection. After reset other object toy array to nullptr and set its m_numToys to 0 (resources was transferred).
+Overloaded -= operator designed to remove a toy from ConfirmOrder.
+Overloaded -= operator created to remove toys from the current ConfirmOrder that are in other.
+contsinsToy check if a specific toy is present in the ConfirmOrder.
+Overloaded << operator output the ConfirmOrder object to the output stream.
+--------------
+Favourite part: 
+if (m_numToys > 0) {
+    m_toys =new const Toy*[m_numToys];
+    for (size_t i = 0;i < m_numToys; ++i) {
+        m_toys[i]= src.m_toys[i];
+    }
+}
+m_toys[i] contains the address of the Toy object in src.m_toys[i]. Actual Toy objects are not duplicated or newly created. Both arrays m_toys and src.m_toys share the same Toy objects. Here is shallow copying (both arrays point to the same set of Toy objects). Modifications made with Toy objects through one array will be reflected in the other array.
+--------------

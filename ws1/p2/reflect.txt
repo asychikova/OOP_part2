@@ -1,0 +1,123 @@
+/*
+*****************************************************************************
+                          OOP345 Workshop - #1 REFLECTION 
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NAA
+*****************************************************************************
+*/
+
+
+
+For event module I implemented The Rule of 3 which is contain: 
+1. Destructor which is responsible for cleaning of dynamically allocated memory for the description: 
+
+   Event::~Event() {
+        delete[] description;
+    }
+  
+2. Copy constructor contain member initializer list where description it set to nullptr and start time copied from the original object. After that is checks for the description of the original object (it can't be nullptr or empty string). Then copy constructor allocates dynamic memory for the description which size is the length of description of original object + 1(for null terminator). After, copy the content of description from original object to new one. 
+
+Event::Event(const Event& other) : description(nullptr), start_time( other.start_time) {
+        if ( other.description !=nullptr && other.description[0] !='\0') { 
+            description =new char[ strlen(other.description ) + 1];
+            strcpy(description, other.description );  
+        }
+    }
+
+For example it used in this part of code: 
+	seneca::Event copy(currentEvent);
+Object with name copy was created and copy constructor perform a copy from the current event to the copy object. 
+
+3. Copy assignment operator used in order to assign value of one object to another. First it checks that object do not assigning to the same object (self assignment). After deallocates dynamic memory for current (this) description, copy start time from other object to this object. Then it checks if the description of other object is not null pointer and not an empty string, if not then allocates dynamic memory for description, with the size of other description + 1 (for null terminator), and perform copy of description from other object to current (this) object. If condition (description of other object is not null pointer and not an empty string) is false, then sets the description of the current object to nullptr. 
+ 
+Event& Event::operator=(const Event& other) {
+        if (this != &other ) {
+            delete[] description;
+            start_time = other.start_time ;
+            if (other.description != nullptr && other.description[0] !='\0') {
+                description = new char[ strlen(other.description) + 1];
+                strcpy(description, other.description );
+            } else {
+                description = nullptr;
+            }
+        }return *this;
+    }
+
+For example copy assignment operator used in order to assign value of copy object to element in the archive array: 	
+	archive[idxArchive++] = copy;
+
+event module contain implementation of the default constructor as well. I used member initializer list where description is set to null pointer and start time is 0:  
+    Event::Event() : description( nullptr), start_time(0) {}
+For example it used for creation of an object of Event class named currentEvent which do not have arguments: 
+seneca::Event currentEvent;
+as well as array of 10 Event objects (each of them will have description which is set to nullptr and start time with 0)
+seneca::Event archive[10];
+
+
+
+Set function is used in order to set the description and start time of Event object (currentEvent) based on input from file : 
+	currentEvent.set(buffer); //memory for description will be allocated based on buffer(desc)
+
+        currentEvent.set(); //reset the currentEvent object, clear description and set the start time to 0.
+
+display function responsible for displaying information about event: 
+I used static counter variable, initialized to 0: 
+static int counter = 0; 
+in order to number the events sequentially. 
+"Static" keyword means that the variable retains its value between function calls.
+
+It prints event information, for example: 
+   currentEvent.display();
+
+Here is logic explanation for time formatting. In the files, time persist in seconds.
+
+            unsigned int hours = start_time /3600; 
+            unsigned int remaining_after_hours =start_time -(hours*3600 );
+            unsigned int minutes =remaining_after_hours/60;
+            unsigned int seconds = remaining_after_hours- (minutes* 60) ;
+
+In order to store values of hours, minutes, seconds and number of seconds remaining after hours I used unsigned int type. I wanted to use unsigned short first, range of unsigned short is 0 to 65535 which is suitable in order to work with data for this workshop (text files). But time values may exceed the range of 65535 overall, that's why I preferred unsigned int here. "Unsigned" ensures that these variables cannot take on negative values.
+
+I'll take the value of 32464 seconds from 7th line of monday.txt which is T32464,SBrowser closed,A,P, to demonstrate how the logic works in display function: 
+
+Time is 32464 seconds, in order to get a formatted value of HH:MM:SS I divided this amount of second on number of 3600 which is number of seconds in the hour. 
+32464 / 3200 = 9
+ Now, hours = 9
+After, in order to store remaining second after division:
+32464 - (9 * 3600) = 64; 
+ Now, remaining_after_hours = 64; 
+Remaining seconds will be useful in order to calculate minutes: 
+64 / 60 = 1;
+ Now, minutes = 1;
+And after that calculate seconds: 
+64 - (1 * 60) = 4;
+ Now, seconds = 4;
+As the result amount of 32464 seconds transferred to 09:01:04 (using formatting)
+
+- Global scope
+    g_sysClock is declared as extern unsigned int g_sysClock; in the seneca namespace. 
+    This makes it available in the global scope and can be accessed from any part of code that includes this header.
+
+In order to allow iteration through command line arguments, prototype for the main function to accept command line arguments was created : 
+
+int main(int argc, char* argv[]) {
+	std::cout << "Command Line:\n";
+	std::cout << "--------------------------\n";
+	// TODO: print the command line here, in the format
+	//   1: first argument
+	//   2: second argument
+	//   3: third argument
+	//   ...
+    for (int i = 0; i < argc;++i) {
+        std::cout<< "  " <<i + 1<< ": " << argv[i] <<std::endl;
+    }
+
+	std::cout << "--------------------------\n\n";
+
+argc represents the number of command-line arguments, and argv is an array of strings containing those arguments. For loop iterates over command-line arguments: 
+ for (int i = 0; i < argc;++i) {
+ std::cout<< "  " <<i + 1<< ": " << argv[i] <<std::endl;
+ }
+Print the position of argument (i + 1), a colon, and argument itself (argv[i]).

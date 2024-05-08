@@ -1,0 +1,190 @@
+/*
+*****************************************************************************
+                          OOP345 Workshop - #5 REFLECTION 
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NAA
+*****************************************************************************
+*/
+
+Code contains of Book(contains information about single book), Movie(contains information about single movie) modules, SpellChecker module, and Collection module which is templated.
+
+
+| Book and SpellChecker |
+
+Book constructor
+
+In order to find position of first comma I used find() method: 
+      size_t pos = strBook.find(','); 
+
+extract substring from the beginning of strBook up to first comma without including it
+ author_m =strBook.substr(0,pos);
+
+next,  find the position of next comma starting after position of 1st comma: 
+size_t nextPos =strBook.find(',',pos + 1);
+
+extract substring between position after first comma position before next comma, it will be title of the book: 
+title_m= strBook.substr(pos +1,nextPos -pos-1);
+
+trims leading and trailing spaces/tabs from title using a while loop and the erase() function. erase will remove number of founded spaces/tabs at the start of the string
+ start = 0;
+        while(start<title_m.length()&& (title_m[start]== ' '||title_m[start]=='\t')) {
+            start++;
+        }
+ title_m.erase(0, start);
+
+after it trims leading and trailing spaces/tabs from the end of the title
+
+strBook - original string with information about book
+pos - position of the first comma in strBook
+nextPos - position of the second comma found, which comes after title in strBook.
+title_m - assigned a substring of strBook starting from position after first comma (pos + 1) and end before second comma (nextPos -pos-1).
+while loop iterates through characters of title_m and trying to find index of the first character which is non-space/non-tab.
+title_m.erase(0, start) remove characters from beginning of title_m up to character at index start. 
+
+Following the same logic, country, year, price and description are trimmed. year converted to int via stoi and price converted to double via stod. 
+
+
+fixSpelling
+
+Book contains a fixSpelling method which is templated method. When instance of book named library is created, the fixSpelling method is called: 	
+for (auto j = 0u; j < library.size(); ++j)
+	library[j].fixSpelling(sp);
+
+fixSpelling method of Book then performs spell-checking functionality on description_m of each Book object.
+
+SpellChecker 
+
+Inside fixSpelling, operator() of SpellChecker called(passed as argument). Operator() iterates through each element of m_bad. For each word it searches for misspelled words(bad words) in m_description. If word was found then it will be replaces with the good one using replace method. replace_m check how many times each word has been replaced. 
+
+    void SpellChecker::operator()(std::string& text) {
+//iteration through each element of the bad_m array
+        for (size_t i =0; i <ARRAY_SIZE;++i) {
+            size_t index =0; //start search from the beginning of description(text)
+            while (true){
+                index =text.find(bad_m[i],index);//search current bad word bad_m[i]
+                if (index == text.length()){ //if index on the end of the text string-exit
+                    break;
+                }
+                if (index!= std::string::npos) { //if bad word found
+                    text.replace(index,bad_m[i].length(), good_m[i]); //replace with corresponding word
+                    replace_m[i]++; //counter ++
+                    index +=good_m[i].length(); //and update index to the end of replaces new good word
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+npos used in this case in order to indicate that that substring was found in description. When find() is called on text to search for bad_m[i], it returns std::string::npos if string was not found. If find func returns valid index (index!= std::string::npos) then bad will be replaced with good word. 
+
+Spellchecker constructor
+
+This constructor in SpellChecker takes conts char* filename parameter. If file was not opened it throw an exception. Also it throw an exception if file have invalid format(if there is no pair of words). 
+    SpellChecker::SpellChecker(const char* filename) {
+        std::ifstream file( filename);
+        if (!file.is_open() ) {
+            throw "Bad file name!";
+        }
+
+        for (size_t i = 0; i < ARRAY_SIZE; ++i) {
+            if (!(file>> bad_m[i]>>good_m[i])) {
+                throw "Invalid file format!";
+            }
+        }
+        file.close();
+    }
+
+
+| Movie |
+
+Movie contains a fixSpelling method which is templated method. When instance of movie named theCollection is created, the fixSpelling method is called.
+fixSpelling method of Movie performs spell-checking functionality on description_m and title_m of each Movie object(same as described for Book). 
+
+Movie constructor have the same logic as Book constructor.
+
+| Collection |
+
+Collection - templated class which is used in order to hold collections of different types (in this case types Book and Movie).
+
+observer_m function pointer that points to a function that checks changes in the collection. For example it is called here: 
+	library.setObserver(bookAddedObserver); 
+thats mean that every time when new book added to library collection, bookAddedObserver will be called. Observer set after the first loop, where the first four books added to the library collection.
+        
+template<typename T>
+    Collection<T>& Collection<T>::operator+=(const T& item) allows to add an item to the collection.
+It checks if item being added exists in the collection by comparing the names. If item is not found in the collection, a new temp array with size one larger than the collection size is created. After it copy existing elements from the original items_m array to temp array and add a new element to the end of temp array. Free the memory occupied by original items_mo array and assigns temp array to the original items_m array.
+If observer function is installed observer_m != nullptr it calls the observer function, and observer pass reference to collection and new element. When new book is added to library collection using += operator, observer function bookAddedObserver will be invoked (if it is set).
+At the end operator += returns a reference to the modified collection.
+
+
+template<typename T>
+    T& Collection<T>::operator[](size_t idx) const allows to access an element in the collection by index and returns a reference to item. If index is bigger that collection size, the exception will be thrown (out_of_range).
+
+
+template<typename T>
+    T* Collection<T>::operator[](const std::string& title) const allows to access element in the collection by title.
+
+
+    1.Difference between the implementations/utilizations of a functor and a lambda expression. When is appropriate to use each one?
+
+Example of lambda expression: 
+    auto adjustBookPrice = [ &usdToCadRate, &gbpToCadRate](seneca::Book& book) {
+        if (book.country()=="US")
+            book.price() *=usdToCadRate;
+        else if (book.country()=="UK" &&book.year() >=1990 &&book.year()<=1999)
+            book.price()*= gbpToCadRate;
+    };
+Which is called here:   
+	for (size_t i = 0;i <library.size();++i)
+        	adjustBookPrice(library[i]);
+
+
+Example of functor: SpellChecker module with overloaded () operator. 
+Which is called here: 
+	library[j].fixSpelling(sp);
+
+
+Key differences and usage: 
+- Functors are created as classes with an overloaded operator() when lambda expression is anonymous function defined with {} syntax.
+- Functors defined separately from place where they are used and allow reusability in multiple places. Lambda expressions used for local short operations.
+- Functors can perform complex operations when lambdas suitable for short operations, when behavior simple and doesn't need to be reused.
+
+    2.The constructor for SpellChecker generates an exception in certain conditions. How would you change your code to achieve the same result, but without exceptions (both on the constructor and on the client side)? Compare the two solutions.
+
+same functionality without using exceptions: 
+	
+	SpellChecker::SpellChecker(const char* filename) {
+        std::ifstream file( filename);
+        if (!file.is_open() ) {
+            std::cout<<"Error:Bad file name"<< std::endl;
+            condition = false;
+            return;
+        }
+
+        for (size_t i =0; i<ARRAY_SIZE; ++i) {
+            if (!(file>> bad_m[i]>>good_m[i])) {
+                std::cout<<"Error:Invalid file format!"<<std::endl;
+                condition= false;
+                file.close();
+                return;
+            }
+        }file.close();
+        condition = true; 
+        }
+
+seneca::SpellChecker sp(argv[i]);
+if (!sp.condition) {
+    std::cout<<"SpellChecker sp(argv[i]) failed for file"<<argv[i] <<std::endl;
+}
+Now constructor return status instead of exception throw. 
+
+    3.The classes Movie and Book contain almost identical logic in loading data from the file. How would you redesign the classes in order not to duplicate that logic?
+In order to do not duplicate the logic of reading data, base class can be created for both of Movie and Book, they have common data members (title, year and description). Book and media after can override load and print logic and for Book can be added additional attributes. 
+
+    4.The classes Movie and Book are instantiated from the main() function using a custom constructor, but they also contain a default constructor. Is the default constructor necessary? Could you remove it? Justify your answer.
+
+For example, default constructor used here: 
+ seneca::Movie movies[5]; - creates array of Movie objects, which require default constructor to initialize each element in the array. That means that default constructor is needed. 
+

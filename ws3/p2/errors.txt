@@ -1,0 +1,9 @@
+w3_p2_prof.cpp:17:6: error: #error "The header guard for 'Collection.h' doesn't follow the convention!"
+   17 |     #error "The header guard for 'Collection.h' doesn't follow the convention!"
+      |      ^~~~~
+w3_p2_prof.cpp:22:6: error: #error "The header guard for 'Pair.h' doesn't follow the convention!"
+   22 |     #error "The header guard for 'Pair.h' doesn't follow the convention!"
+      |      ^~~~~
+w3_p2_prof.cpp:27:6: error: #error "The header guard for 'Set.h' doesn't follow the convention!"
+   27 |     #error "The header guard for 'Set.h' doesn't follow the convention!"
+      |      ^~~~~
