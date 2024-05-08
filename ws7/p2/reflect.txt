@@ -1,0 +1,183 @@
+/*
+*****************************************************************************
+                          OOP345 Workshop - #7 REFLECTION 
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NAA
+*****************************************************************************
+*/
+
+1. List all the STL functions that you have used in this workshop; explain your reasoning for choosing each one, and not another.
+
+std::isspace - within trim function identifies whitespace characters.
+
+std::sort - sort elements in a range.
+
+std::for_each - directly use specified lambda function to each element in the songs vector. It modifies album attribute of each Song object if it equals to [None].
+
+std::any_of - check if element in songs satisfies condition, it allow to specify custom predicate.
+
+std::copy_if - copy elements from source to destination artistSongs only if condition satisfied.
+
+std::back_inserter - insert copied elements into artistSongs list. 
+
+std::stoi and std::stod - converting strings to integers and doubles.
+
+std::empty - check if string year_str empty or not 
+
+iomanip which is part of STL:
+
+std::setw - sets width for output field, ensuring spacing.
+
+std::setprecision - sets number of decimal places for floating-point.
+
+2. Present the advantages of using STL algorithms vs. implementing the functionality by yourself using loops. 
+STL algorithms abstract implementation details, work with different container types. Also, it reducing bugs and errors since algorithms created by developers. 
+
+3. The function that sorts the collection of songs receives as a parameter the field name to use; this can create errors if the client specifies an invalid field (or misspells it). How would you redesign that function to prevent the client to specify an invalid string, allowing any error to be detected by the compiler?
+
+In order to allow errors to be detected by the compiler, there should be a way where the field names are known at compile-time: 
+   SongCollection.h file
+    class SongCollection {
+	public:
+        static const std::string TIT;
+    	static const std::string ALB;
+    	static const std::string LEN;
+
+    SongCollection.cpp file: 
+const std::string SongCollection::TIT ="title";
+const std::string SongCollection::ALB= "album";
+const std::string SongCollection::LEN= "length";
+
+void SongCollection::sort(const std::string& field) {
+    if (field==TIT) {
+        std::sort(songs.begin(), songs.end(),compareByTitle);
+    } else if (field==ALB) {
+        std::sort(songs.begin(),songs.end(),compareByAlbum);
+    } else if(field==LEN) {
+        std::sort(songs.begin(), songs.end(),compareByLength);
+    } else {
+        std::cout<<"Incorrect field name: "<<field<< std::endl;
+    }
+}
+
+this way will works only if field is misspelled:
+  void SongCollection::sort(const std::string& field){
+        if (field =="title") {
+            std::sort(songs.begin(), songs.end(),compareByTitle);
+        }else if (field== "album") {
+            std::sort(songs.begin(), songs.end(),compareByAlbum);
+        } else if (field== "length") {
+            std::sort(songs.begin(),songs.end(),compareByLength);
+        } else {
+        std::cout <<"Incorrect field name: "<<field<< std::endl;
+    	}
+    }
+
+SongCollection: 
+
+SongCollection constructor 
+Read data from file and associate songs vector with Song objects   
+SongCollection::SongCollection(const std::string& filename) {
+        std::ifstream file(filename); //open file
+        if(!file.is_open()) {
+            throw std::invalid_argument("Can't open the file");
+        } //if it is not open will be exception
+        std::string line;
+        while (std::getline(file,line)) { //read each line
+            Song song; //each line is song object
+            song.title =line.substr(0,25); //substraction of title form idx 0 with length of 25 from line string
+            song.artist= line.substr(25, 25);//substraction of artist form idx 25 with length of 25 from line string
+            song.album= line.substr(50,25);//substraction of album form idx 50 with length of 25 from line string
+
+            song.title =trim(song.title);//call trim function to remove spaces
+            song.artist =trim(song.artist);//call trim function to remove spaces
+            song.album =trim(song.album);//call trim function to remove spaces
+
+            std::string year_str= trim(line.substr(75,5));//extract year from 75th index with length of 5 from line and call trim function to remove spaces
+            std::string length_str= trim(line.substr(80,5));//extract length from 80th index with length of 5 from line and call trim function to remove spaces
+            std::string price_str =trim(line.substr(85, 5));//extract price from 85th index with length of 5 from line and call trim function to remove spaces
+
+            song.year =year_str.empty()? 0 : std::stoi(year_str); //string to int conversion, if empty assign 0 
+            song.length=  std::stoi(length_str); //string to int conversion 
+            song.m_price= std::stod(price_str);//string to double conversion 
+
+            songs.push_back(song); //adding of the song object to songs vector
+        }
+        file.close() ;
+    }
+
+
+trim function for space removal (from end and start of the string)
+    std::string SongCollection::trim(const std::string& str) {
+        size_t start =0; //start idx of the string is 0
+        while(start< str.length()&& std::isspace(str[start]) ) {
+            start++;
+        }//increments start unltil non-space character reached(using isspace) or end of string
+        size_t end =str.length()- 1; //end of the string
+        while (end >start&& std::isspace(str[end]) ) {
+            end-- ;
+        }//decrements end unltil non-space character reached(using isspace) or start of string
+        return str.substr(start,end -start +1); //trim string from new start position to new end. result - string without leading and trailing spaces
+    }
+
+
+sort 
+
+Declaring comparison functions as static allow them to be called without instance of the SongCollection class. They can be called using class name itself.
+    bool SongCollection::compareByTitle(const Song& a,const Song& b) {
+        return a.title <b.title;
+    }//comparison functions, compare two Song objects based on titles
+
+    bool SongCollection::compareByAlbum(const Song& a,const Song& b) {
+        return a.album <b.album;
+    }//comparison functions, compare two Song objects based on albums
+
+    bool SongCollection::compareByLength(const Song& a,const Song& b) {
+        return a.length <b.length;
+    }//comparison functions, compare two Song objects based on lengths
+
+    void SongCollection::sort(const std::string& field){ //field as input
+        if (field =="title") {
+            std::sort(songs.begin(), songs.end(),compareByTitle);
+
+sort elements in a range. songs.begin() pointing to the beginning of range of elements to be sorted, first element of songs vector. songs.end() points to the position after last element of vector. 
+compareByTitle: criteria for sorting. Returns a boolean value indicating whether the first parameter should precede the second in sorted order. When std::sort needs to compare two Song during sorting process, it calls compareByTitle with these objects as arguments.compareByTitle function returns true if title of first Song should precede the title of the second Song object in the sorted order, and false otherwise. It compares first and second elements, then second and third elements until it reaches the end of range.
+
+        }else if (field== "album") {
+            std::sort(songs.begin(), songs.end(),compareByAlbum);
+        } else if (field== "length") {
+            std::sort(songs.begin(), songs.end(),compareByLength);
+        }
+    }
+
+
+
+cleanAlbum remove string "[None]" from album field 
+    void SongCollection::cleanAlbum() {
+        std::for_each(songs.begin(),songs.end(),[](Song& song) { //lambda executed for each element
+            if (song.album =="[None]") { //check if album field is "[None]"
+                song.album =""; //replaces with empty string 
+            }
+        });
+
+
+
+inCollection check if any Song object in collection has matching artist name
+    bool SongCollection::inCollection(const std::string& artist) const {
+        return std::any_of( songs.begin(),songs.end(), [&artist](const Song& song) {//checks if at least one element match condition, lambda executed for each 
+            return song.artist== artist; //return only matched records
+        });
+    }
+
+getSongsForArtist use std::copy_if algorithm to copy songs from songs vector to new list artistSongs only if they mathced specified artist
+    std::list<Song> SongCollection::getSongsForArtist(const std::string& artist) const { 
+        std::list<Song> artistSongs; //local variable
+        std::copy_if(songs.begin(),songs.end(),std::back_inserter(artistSongs),[&artist](const Song& song) { //copy_if algorithm copies elements from songs to artistSongs only if condition meets. Lambda specifies this condition(by reference takes parameter artist and checks if artist of each song match it). after, back_inserter insert element at the end of the list(add elements as push_back but works differently). 
+        return song.artist ==artist;
+        });
+        return artistSongs;
+    }
+
+I did not implemented requirement to do not use for loops in entire code since I had some difficulties with finding the right algorithm for display function. 

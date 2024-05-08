@@ -1,0 +1,134 @@
+/*
+*****************************************************************************
+                          OOP345 Workshop - #6 REFLECTION 
+Full Name  : Anna Sychikova
+Student ID#: 159363217
+Email      : asychikova@myseneca.ca
+Section    : NAA
+*****************************************************************************
+*/
+
+This workshop contains College, Employee, Professor, Student, Utilities and Person modules. 
+ *the most time-consuming part was creating constructors well as college module 
+College.cpp : 
+    College& College::operator+=(Person* thePerson)
+        {
+            m_persons.push_back(thePerson);
+            return *this;
+        }
+    m_persons.push_back(the Person): m_persons is a vector of pointers to Person objects (std::vector<Person*>), this operation adds pointer to the end of vector.
+
+if(dynamic_cast<Professor*>(person)){
+                    const Employee* employee =dynamic_cast<Employee*>(person);
+
+    dynamic_cast<Professor*>(person): attempts to convert pointer person, which is of type Person*, into a pointer of type Professor*. If object pointed to by person is indeed a Professor object dynamic cast succeeds, and it returns Professor* pointer. 
+
+    Inside if block, const Employee* employee = dynamic_cast<Employee*>(person); attempts another dynamic cast. It's trying to cast Person* pointer person to a pointer of type Employee*. If the object pointed to by person is indeed an Employee object (or a derived class of Employee which is Professor), the dynamic cast succeeds, and it returns a valid Employee* pointer, which is then assigned to the variable employee. 
+
+This code part checks if Person* pointer person points to a Professor object. If it is, it checks if object is also an Employee. If both conditions are true, it allows access to Employee functionality by providing a valid Employee* pointer through employee. If not, it skips this block and move on to other conditions or statements.
+
+
+else if(dynamic_cast<Student*>(person)) {
+                    const Student* student =dynamic_cast<Student*>(person);
+checks if the Person* pointer person points to  Student object or derived class of Student. If it does, it allow access to Student functionality by providing a valid Student* pointer through student. 
+
+    dynamic_cast<Student*>(person): attempts to convert pointer person, which is of type Person*, into a pointer of type Student*. If object pointed to by person is indeed a Student object dynamic cast succeeds, it return valid Student* pointer. 
+
+    else if (dynamic_cast<Student*>(person)): if cast was successful, student will hold a valid pointer to Student object pointed to by person. 
+
+
+Student: 
+readCourses : this function takes three parameters: const reference to a std::string (name), integer count, and reference to a std::istream (in). It reads a line of comma-separated courses from the input stream one by one, and add them to m_courses vector of Student object. 
+
+void Student::readCourses(const std::string& name, int count, std::istream& in) {
+    std::string courseLine;
+    std::getline(in,courseLine); //read line from input stream
+    courseLine =removeLeadingAndTrailingWhitespace(courseLine); //remove whitespaces from the line
+    size_t startPos= 0;
+    size_t endPos =0;
+    int coursesRead= 0;
+    while (coursesRead <count &&endPos!= std::string::npos) {//iteration in line until all courses are read or end reached
+        endPos = courseLine.find(',',startPos); //position of the next comma using find
+        std::string singleCourse= courseLine.substr(startPos, endPos - startPos);// extract course substr (startPos to endPos)
+        singleCourse = removeLeadingAndTrailingWhitespace(singleCourse);  // whitespace from substring removal
+
+        m_courses.push_back(singleCourse); //course added to vector of courses
+        if (endPos!= std::string::npos) {  //startPos update for next iteration
+            startPos = endPos+ 1;
+        }coursesRead++;
+    }
+}
+    
+
+
+Questions: 
+1.Why do you need to deallocate the dynamically allocated memory in your vector?
+
+m_persons is a vector of pointers to Person objects (std::vector<Person*>). These pointers are dynamically allocated when new persons are added to college using += operator.
+When college object is destroyed memory allocated for person objects must be freed to prevent memory leak.
+
+College::~College()
+        { for (auto& person : m_persons)
+                delete person;
+        }
+
+In College destructor, each pointer in m_persons vector is iterated and delete is called for it. memory that each pointer points to is freed. Memory allocated for each Person object will be freed when the College object is destroyed.
+
+2.When building an object from the input file, different things can go wrong: the record represents an unknown type of person, or record contains invalid data. How can the function loadData() detect what went wrong? Can you think at another solution than the one you have implemented?
+
+loadData() function can detect errors in the input file by handling exceptions that occur when creating person objects. These exceptions may be if record represents an unknown type of person(nullptr will be returned)     
+Person* buildInstance(std::istream& in)
+    {
+        char tag;
+        if (!(in>> tag))
+            return nullptr;
+
+        if (tag == ' '|| tag =='\t') {
+            in >>tag;
+        }
+        
+        if (tag == 'E'|| tag== 'e')
+            return new Employee(in);
+        else if (tag =='S'|| tag== 's')
+            return new Student(in);
+        else if (tag =='P' ||tag =='p')
+            return new Professor(in);
+        return nullptr; // unknown type of person, return nullptr
+    } 
+
+or if
+record contains invalid data (exceptions will be thrown when creating person objects).
+        std::getline(in, id,',');
+        id =removeLeadingAndTrailingWhitespace(id);
+        if (id[0] !='S') {
+            throw std::invalid_argument(name + "++Invalid record! ID");
+        }
+
+void loadData(const char* filename, seneca::College& theCollege)
+{
+	std::ifstream file(filename);
+	if (!file)
+	{
+		std::cout << "ERROR: Cannot open file [" << filename << "].\n";
+		return;
+	}
+	seneca::Person* thePerson = nullptr;
+	while (file)
+	{
+		try {
+			thePerson = seneca::buildInstance(file);
+			if (thePerson)
+				theCollege += thePerson;
+		} catch (const std::exception& e) { 
+			std::cerr << e.what() << std::endl;
+		}
+	}
+}
+
+3.In this workshop you had to use std::list<seneca::Person*> and std::vector<seneca::Person*> to store a collection of persons as pointers. Could you have used std::list<seneca::Person> and std::vector<seneca::Person> instead? Justify your answer!
+
+std::list<seneca::Person*> and std::vector<seneca::Person*> are used to store collection of persons as pointers (Person*). 
+This is done in order to use polymorphism. Person* allows to store derived classes Employee, Student, Professor in one container. Direct object storage (std::list<seneca::Person> or std::vector<seneca::Person>) would lead to loss of behavior of derived classes. all objects would act as a base class without following special methods such as courses for students or a department for a professor. Using pointers to objects allows to maintain polymorphic behavior and preserve properties specific to derived class.
+
+
+
