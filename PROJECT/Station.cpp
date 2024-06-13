@@ -1,14 +1,4 @@
-/*
-*****************************************************************************
-                          OOP345 MS3
-Full Name  : Anna Sychikova
-Student ID#: 159363217
-Email      : asychikova@myseneca.ca
-Section    : NAA
-Date of completion: 6th of March, 
-I started Project at the first day of the release, during the midterm week, ~26 of February
-*****************************************************************************
-*/
+
 #include <iomanip>
 #include "Station.h"
 #include "Utilities.h"
