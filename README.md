@@ -1,15 +1,4 @@
 # OOP_part2
-/*
-*****************************************************************************
-                          OOP345 Project
-Full Name  : Anna Sychikova
-Student ID#: 159363217
-Email      : asychikova@myseneca.ca
-Section    : NAA
-Date of completion: 5th of April, 
-I started Project at the first day of the release, during the midterm week, ~26 of February
-*****************************************************************************
-*/
 
 In this project we have: 
 
