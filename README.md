@@ -11,9 +11,9 @@ Workstation: manages three queues of CustomerOrders: g_pending, g_completed, and
 orders from the deque of customer orders m_orders within each Workstation will be sent to one of global queues (g_pending, g_completed, g_incomplete).Workstation object is responsible for managing customer orders at a particular station on the assembly line. 
 Line manager: manages an assembly line of stations, initialize assembly line, reorder stations, run operations on the workstations for a single iteration. Also it is responsible for movement of items ensuring that each order is filled (or tried to be filled)
 
--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 Utilities Module
--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 Utilities module contains solution for parsing string data from input files into tokens. It will be used to extract all tokens from files. It have: 
 size_t m_widthField =1 ; which is a length of token,
 static char m_delimiter; separates tokens in string.
@@ -58,9 +58,9 @@ char Utilities::getDelimiter() {
 } - return delimiter 
 
 
--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 Station Module
--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 Station module manages station, each station created to fill specific item. It have functionality which help to identify stations from file using utilities module because station files have data separated by delimiter. Also it contains functions that allows to manage the state of station.
 
 Class station have: 
