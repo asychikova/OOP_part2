@@ -1,14 +1,4 @@
-/*
-*****************************************************************************
-                          OOP345 MS3
-Full Name  : Anna Sychikova
-Student ID#: 159363217
-Email      : asychikova@myseneca.ca
-Section    : NAA
-Date of completion: 4th of April, (customer order module was changed for 3rd MS) 
-I started Project at the first day of the release, during the midterm week. 
-*****************************************************************************
-*/
+
 #ifndef SENECA_CUSTOMERORDER_H
 #define SENECA_CUSTOMERORDER_H
 #include "Station.h"
